@@ -110,6 +110,14 @@ public interface FishingConfig extends Config
 
 	@ConfigItem(
 		position = 7,
+		keyName = "showAerialFishingOverlay",
+		name = "Show Aerial Fishing overlay",
+		description = "Display the aerial fishing progress pie overlay."
+	)
+	default boolean showAerialFishingOverlay() { return true; }
+	
+	@ConfigItem(
+		position = 8,
 		keyName = "trawlerNotification",
 		name = "Trawler activity notification",
 		description = "Send a notification when fishing trawler activity drops below 15%."
