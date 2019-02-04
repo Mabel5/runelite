@@ -52,6 +52,9 @@ class FishingSpotOverlay extends Overlay
 	private static final Duration MINNOW_MOVE = Duration.ofSeconds(15);
 	private static final Duration MINNOW_WARN = Duration.ofSeconds(3);
 
+	private static final Duration AERIAL_FISHING_MOVE = Duration.ofMillis(5500);
+	private static final Duration AERIAL_FISHING_WARN = Duration.ofMillis(6000);
+
 	private final FishingPlugin plugin;
 	private final FishingConfig config;
 	private final Client client;
@@ -117,6 +120,43 @@ class FishingSpotOverlay extends Overlay
 						pie.setPosition(location);
 						pie.setProgress((float) millisLeft / MINNOW_MOVE.toMillis());
 						pie.render(graphics);
+					}
+				}
+			}
+
+			if (spot == FishingSpot.COMMON_TENCH && config.showAerialFishingOverlay())
+			{
+				AerialFishingSpot aerialFishingSpot = plugin.getAerialFishingSpots().get(npc.getIndex());
+				if (aerialFishingSpot != null)
+				{
+					long maxSpotDuration = AERIAL_FISHING_MOVE.toMillis() + AERIAL_FISHING_WARN.toMillis();
+					long timeElapsedSinceSpawn = Duration.between(aerialFishingSpot.getTime(), Instant.now()).toMillis();
+					long millisLeft = maxSpotDuration - timeElapsedSinceSpawn;
+
+					LocalPoint localPoint = npc.getLocalLocation();
+					Point location = Perspective.localToCanvas(client, localPoint, client.getPlane());
+
+					if (location != null)
+					{
+						ProgressPieComponent pie = new ProgressPieComponent();
+
+						if(millisLeft < AERIAL_FISHING_WARN.toMillis())
+						{
+							pie.setProgress((float) millisLeft / AERIAL_FISHING_WARN.toMillis());
+							color = Color.ORANGE;
+						}
+
+						else
+						{
+							pie.setProgress(1.0f - ((float) timeElapsedSinceSpawn / AERIAL_FISHING_MOVE.toMillis()));
+
+						}
+
+						pie.setFill(color);
+						pie.setBorderColor(color);
+						pie.setPosition(location);
+						pie.render(graphics);
+
 					}
 				}
 			}

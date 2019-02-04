@@ -88,6 +88,9 @@ public class FishingPlugin extends Plugin
 	private final Map<Integer, MinnowSpot> minnowSpots = new HashMap<>();
 
 	@Getter(AccessLevel.PACKAGE)
+	private final Map<Integer, AerialFishingSpot> aerialFishingSpots = new HashMap<>();
+
+	@Getter(AccessLevel.PACKAGE)
 	private final List<NPC> fishingSpots = new ArrayList<>();
 
 	@Getter(AccessLevel.PACKAGE)
@@ -294,6 +297,18 @@ public class FishingPlugin extends Plugin
 					minnowSpots.put(id, new MinnowSpot(npc.getWorldLocation(), Instant.now()));
 				}
 			}
+
+			else if (FishingSpot.getSPOTS().get(npc.getId()) == FishingSpot.COMMON_TENCH && config.showAerialFishingOverlay())
+			{
+				final int id = npc.getIndex();
+				final AerialFishingSpot aerialFishingSpot = aerialFishingSpots.get(id);
+
+				//add or update the spot in the list of aerial fishing spots
+				if (aerialFishingSpot == null || !aerialFishingSpot.getLoc().equals(npc.getWorldLocation()))
+				{
+					aerialFishingSpots.put(id, new AerialFishingSpot(npc.getWorldLocation(), Instant.now()));
+				}
+			}
 		}
 	}
 
@@ -316,13 +331,18 @@ public class FishingPlugin extends Plugin
 	{
 		final NPC npc = npcDespawned.getNpc();
 
+		if(aerialFishingSpots.containsKey(npc))
+		{
+			aerialFishingSpots.remove(npc);
+		}
+		else if (minnowSpots.containsKey(npc))
+		{
+			minnowSpots.remove(npc);
+		}
+
 		fishingSpots.remove(npc);
 
-		MinnowSpot minnowSpot = minnowSpots.remove(npc.getIndex());
-		if (minnowSpot != null)
-		{
-			log.debug("Minnow spot {} despawned", npc);
-		}
+
 	}
 
 	@Subscribe
